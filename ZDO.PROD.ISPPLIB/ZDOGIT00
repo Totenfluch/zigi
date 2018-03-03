@@ -1,0 +1,18 @@
+)ATTR DEFAULT() FORMAT(MIX)                                                  
+  ! TYPE(output) INTENS(HIGH)                                                   
+  } TYPE(output) INTENS(LOW)                                                    
+  _ TYPE(INPUT) INTENS(HIGH) HILITE(USCORE) CAPS(OFF)                           
+  $ TYPE(INPUT) INTENS(LOW)                                                     
+)BODY WINDOW(65,09)                                                             
+%                       ZIGI v1.0 alpha                                         
++   Member or PDS to add  : !WHAT                              +                
++   Current git repo path : _repop                             +                
++   Short Commit mesage   : _commitm                           +                
++                                                                               
+%                   ÝENTER¨ to continue...                                      
+%                                               @wizardofzos 2018               
+)INIT                                                                           
+.CURSOR = repop                                                                 
+)REINIT                                                                         
+)PROC                                                                           
+)END                                                                            
