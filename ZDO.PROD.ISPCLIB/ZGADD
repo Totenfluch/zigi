@@ -1,0 +1,129 @@
+/* REXX */                                                                      
+/*                                       */                                     
+/* Author                                */                                     
+/* Henri Kuiper                          */                                     
+/*                                       */                                     
+/* Repo                                  */                                     
+/* https://github.com/wizardofzos/1      */                                     
+/*                                       */                                     
+/* Purpose                               */                                     
+/* Adding members or complete libraries  */                                     
+/* to a local (USS based) git repository */                                     
+/*                                       */                                     
+/*                                       */                                     
+/* Trace ?r */                                                                  
+/*                                                                   */         
+/*********************************************************************/         
+/*                                                                   */         
+/*   D I S C L A I M E R !                                           */         
+/*   ---------------------                                           */         
+/*                                                                   */         
+/* This program is FREEWARE. Use at your own risk. Neither Henri     */         
+/* Kuiper, nor other contributing organizations or individuals       */         
+/* accept any liability of any kind howsoever arising out of the use */         
+/* of this program. You are free to use and modify this program as   */         
+/* you desire, however, the author does ask that you leave his name  */         
+/* in the source and give credit to him as the original programmer.  */         
+/*                                                                   */         
+/*********************************************************************/         
+/* ZGADD   : Add member or library to a git repository in USS.       */         
+/*           Initializes git repo if not existing yet                */         
+/*********************************************************************/         
+/* Make sure this REXX is available in your ISPCLIB concatenation... */         
+/*********************************************************************/         
+LASTUPD = '03/03/2018'                       /* date of last update  */         
+VERSION = '1.0alpha'                         /* some sort of version */         
+/*********************************************************************/         
+/* B E G I N    C U S T O M I Z A T I O N    S E C T I O N    HK2018 */         
+/*                                                            HK2018 */         
+/*   You may change the variables below to your preference.   HK2018 */         
+/*********************************************************************/         
+GITDIR = '/zdo/git'               /* Change this to git installation */         
+PANEL = 'ZDO.PROD.ISPPLIB'        /* Change this to panel location   */         
+/*********************************************************************/         
+/* E N D    C U S T O M I Z A T I O N    S E C T I O N               */         
+/*********************************************************************/         
+/*                                     You are on your own from here */         
+/*********************************************************************/         
+                                                                                
+Arg WHAT                            /* Get the member (or dataset)   */         
+Signal On  Syntax  name SIG_ALL     /* trap syntax errors            */         
+"ISPEXEC VGET (repop) PROFILE"      /* Get repodir from profile      */         
+if repop = "" then repop = "/path/to/repo"                                      
+commitm = "This commit is awesome"  /* Pre-populate commit message   */         
+                                    /* Popping the panel            **/         
+"ISPEXEC LIBDEF ISPPLIB DATASET ID('"PANEL"')"                     /**/         
+"ISPEXEC ADDPOP"                                                   /**/         
+"ISPEXEC DISPLAY PANEL(ZDOGIT00)"                                  /**/         
+"ISPEXEC REMPOP"                                                   /**/         
+                                                                                
+"ISPEXEC VPUT (repop) PROFILE"      /* Store repodir in profile      */         
+DIR=repop                                                                       
+/******************************************more ugly code below :)****/         
+envs = ". "GITDIR"/bin/environment.sh"                                          
+/* check if the DIR is not already a git repo */                                
+if bpxwunix("ls "DIR"/.git")=1 then do                                          
+  call bpxwunix envs" && cd "DIR" && git init"                                  
+  call syscalls 'ON'                                                            
+  if RESULT > 0 then do                                                         
+    say "Problems enabling syscalls."                                           
+    say "Result from call syscalls 'ON'=" RESULT                                
+    say "Please create a .gitattributes manually in "DIR                        
+    say "Contents:"                                                             
+    say "------------------------------------------------------------"          
+    say "* git-encoding=iso8859-1 working-tree-encoding=ibm-1047"               
+    say "------------------------------------------------------------"          
+  end                                                                           
+  else do                                                                       
+    address syscall                                                             
+    path = DIR"/.gitattributes"                                                 
+    'open' path,                                                                
+           O_rdwr+O_creat+O_trunc,                                              
+           660                                                                  
+    if retval=-1 then do                                                        
+      say "Error opening "path                                                  
+      say "Create your own .gitattributes (see source of this REXX)"            
+      exit                                                                      
+    end                                                                         
+    else do                                                                     
+      fd = retval                                                               
+      a = "# This .gitattrtibutes file is autogenerated"                        
+      b = "# It is needed for minimal functionlaity for z/OS members"           
+      c = "*     git-encoding=iso8859-1 working-tree-encoding=ibm-1047"         
+      a = a || esc_n || esc_r                                                   
+      b = b || esc_n || esc_r                                                   
+      c = c || esc_n || esc_r                                                   
+      'write' fd 'a' length(a)                                                  
+      'write' fd 'b' length(b)                                                  
+      'write' fd 'c' length(c)                                                  
+      'write' fd 'd' length(d)                                                  
+      'close' fd                                                                
+      address TSO                                                               
+      call bpxwunix 'cd 'DIR' && chtag -tc ibm-1047 .gitat*'                    
+      call bpxwunix envs' && cd 'DIR' && git add .gitattributes'                
+      call bpxwunix envs' && cd 'DIR' && git commit -m "first post"'            
+    end                                                                         
+  end                                                                           
+end                                                                             
+If POS('(', WHAT) > 0                                                           
+  then do                                                                       
+    parse var WHAT PDS'('MEM')'                                                 
+    PDS = strip(PDS,"B","'")                                                    
+    mkdir = "mkdir -p "DIR"/"PDS                                                
+    call bpxwunix mkdir                                                         
+    target = "'"DIR"/"PDS"/"MEM"'"                                              
+    OPUT WHAT target                                                            
+  end                                                                           
+  else do                                                                       
+    parse var WHAT PDS                                                          
+    PDS = strip(PDS,"B","'")                                                    
+    mkdir = "mkdir -p "DIR"/"PDS                                                
+    call bpxwunix mkdir                                                         
+    copycmd = "//'"PDS"'"                                                       
+    copycmd = '"'copycmd'"'                                                     
+    copycmd = "cp -U -M" copycmd" "DIR"/"PDS"/"                                 
+    call bpxwunix copycmd                                                       
+  end                                                                           
+  call bpxwunix envs" && cd "DIR" && git add ."                                 
+  call bpxwunix envs" && cd "DIR" && git commit -m '"commitm"'"                 
+exit 0                                                                          
