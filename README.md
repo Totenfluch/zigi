@@ -18,6 +18,14 @@ To do so you need to download the latest version of bash, gzip, perl and git fro
 Then place them in a directory within your USS environment and add the installer script from this gist (https://gist.github.com/wizardofzos/897b243d4cbe9fbc471ec1396fbbe174)
 
 ## TODO:
-* add 'pushing' capabilities
+* add 'pushing' capabilities (sort of implemented)
 * add 'pulling' capabilities (zgpull)
 * add features to work with branches
+
+## Current (1.1) pushing
+Make sure to *manually* do a git remote add origin <your repo uri> and a 
+git push -u origin master.                         
+Also do a (local) git config user.name and user.mail.
+Then, when you ZGADD a member (or PDS/Library) it will be auto pushed
+--> THERE IS NO PULL YET. This probably means if remote is updated, the push
+will break :)
