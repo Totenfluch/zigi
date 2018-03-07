@@ -28,11 +28,15 @@
 /*********************************************************************/         
 /* ZGADD   : Add member or library to a git repository in USS.       */         
 /*           Initializes git repo if not existing yet                */         
+/* Tips    : Make sure to : git config user.name "name"              */         
+/*                          git config user.email "mail"             */         
+/*                          git remote add origin ...                */         
+/*            If you want this to auto push (master only now)        */         
 /*********************************************************************/         
 /* Make sure this REXX is available in your ISPCLIB concatenation... */         
 /*********************************************************************/         
-LASTUPD = '03/03/2018'                       /* date of last update  */         
-VERSION = '1.0alpha'                         /* some sort of version */         
+LASTUPD = '07/03/2018'                       /* date of last update  */         
+VERSION = '1.1alpha'                         /* some sort of version */         
 /*********************************************************************/         
 /* B E G I N    C U S T O M I Z A T I O N    S E C T I O N    HK2018 */         
 /*                                                            HK2018 */         
@@ -51,6 +55,9 @@ Signal On  Syntax  name SIG_ALL     /* trap syntax errors            */
 "ISPEXEC VGET (repop) PROFILE"      /* Get repodir from profile      */         
 if repop = "" then repop = "/path/to/repo"                                      
 commitm = "This commit is awesome"  /* Pre-populate commit message   */         
+"ISPEXEC VGET (branch) PROFILE"                                                 
+if branch = "" then branch = "master"                                           
+"ISPEXEC VGET (remote) PROFILE"                                                 
                                     /* Popping the panel            **/         
 "ISPEXEC LIBDEF ISPPLIB DATASET ID('"PANEL"')"                     /**/         
 "ISPEXEC ADDPOP"                                                   /**/         
@@ -58,6 +65,8 @@ commitm = "This commit is awesome"  /* Pre-populate commit message   */
 "ISPEXEC REMPOP"                                                   /**/         
                                                                                 
 "ISPEXEC VPUT (repop) PROFILE"      /* Store repodir in profile      */         
+"ISPEXEC VPUT (branch) PROFILE"     /* Store branch in profle        */         
+"ISPEXEC VPUT (remote) PROFILE"     /* Store branch in profle        */         
 DIR=repop                                                                       
 /******************************************more ugly code below :)****/         
 envs = ". "GITDIR"/bin/environment.sh"                                          
@@ -105,6 +114,7 @@ if bpxwunix("ls "DIR"/.git")=1 then do
     end                                                                         
   end                                                                           
 end                                                                             
+/* Finished with initial setup */                                               
 If POS('(', WHAT) > 0                                                           
   then do                                                                       
     parse var WHAT PDS'('MEM')'                                                 
@@ -124,6 +134,16 @@ If POS('(', WHAT) > 0
     copycmd = "cp -U -M" copycmd" "DIR"/"PDS"/"                                 
     call bpxwunix copycmd                                                       
   end                                                                           
+  /* add the files just copied to the repo */                                   
   call bpxwunix envs" && cd "DIR" && git add ."                                 
+  /* then commit the additions with the msg from panel */                       
   call bpxwunix envs" && cd "DIR" && git commit -m '"commitm"'"                 
+  /* check for a remote */                                                      
+  call bpxwunix envs" && cd "DIR" && git remote -v",,b.                         
+  if b.0 > 0 then do                                                            
+    /* naive, there must be a remote configured, let's push */                  
+    pc = "git push origin master > /tmp/a"                                      
+    call bpxwunix envs" && cd "DIR" && "pc                                      
+    /* Ugly but functional for now */ say "Pushed to origin"                    
+  end                                                                           
 exit 0                                                                          
