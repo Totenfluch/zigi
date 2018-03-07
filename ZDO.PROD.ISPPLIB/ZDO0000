@@ -1,0 +1,103 @@
+)PANEL KEYLIST(ISRSAB,ISR)
+)ATTR DEFAULT() FORMAT(MIX)
+ 0B TYPE(AB)
+ 0D TYPE(PS)
+ 04 TYPE(ABSL)
+ 05 TYPE(PT)
+ 09 TYPE(FP)
+ 0A TYPE(NT)
+ 11 TYPE(SAC)
+ 26 TYPE(NEF) CAPS(ON)
+ 27 AREA(SCRL)
+)ABC DESC('Menu') MNEM(1)
+PDC DESC('Exit')
+ACTION RUN(EXIT)
+)ABCINIT
+.ZVARS=ISR@OPT
+)ABC DESC('Help') MNEM(1)
+PDC DESC('Exit')
+ACTION RUN(EXIT)
+)ABCINIT
+.ZVARS=ISR@OPT
+)BODY  CMD(ZCMD)
+Ž Menu HelpŽ
+œ------------------------------------------------------------------------------
+Ž                          	zdevops ISPF Panel     Ž                           Ž
+Option ===>Z                                                                 Ž
+SAREA39                                                                       
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+)AREA SAREA39
+1 z/USER     ŽAdd / Delete Users                                      Ž      Ž
+2 Projects 01ŽManage Projects                                         Ž      Ž
+3            Ž                                           Ž                   Ž
+4            Ž                                                     Ž         Ž
+5            Ž                                            Ž                  Ž
+6            Ž                                            Ž                  Ž
+7            Ž                                            Ž                  Ž
+8            Ž                                            Ž                  Ž
+9            Ž                                            Ž                  Ž
+10           Ž                                            Ž                  Ž
+11           Ž                                            Ž                  Ž
+12           Ž                                            Ž                  Ž
+13           Ž                                            Ž                  Ž
+14z/Main     ŽThis screen again ;)                                           Ž
+             Ž                                                               Ž
+)INIT
+.ZVARS = '(ZCMD)'
+.HELP = ISR30000
+.ATTR(ZCMD)='PADC(USER)'
+)PROC
+&NEXTOPT = .TRAIL
+&ZSEL = TRANS ( TRUNC (&ZCMD,'.')
+  1,'PGM(GIMSTART) PARM(&ZCMD) NOCHECK'
+  2,'PANEL(ZDO0200)'
+  3,'PANEL(ICHP00)'
+  4,'CMD(CBDCHCD)'
+  5,'PGM(ISFISP) NOCHECK NEWAPPL(ISF) PARM(&NEXTOPT)'
+  6,'PANEL(IPC@PRIM)'
+  7,'CMD(DITTO)'
+  8,'CMD(RMF)'
+  10,'CMD(OMVS)'
+  11,'PANEL(ATRFPCMN) NEWAPPL(RRSP)'
+  12,'CMD(%CSQOREXX CSQ700 E) NEWAPPL(CSQO) PASSLIB'
+  13,'PANEL(FMNSTASK) SCRNAME(FILEMGR) NEWAPPL(FMN)'
+  14,'PANEL(ZDO0000)'
+ ' ',' '
+   *,'?' )
+
+
+
+&ZTRAIL=.TRAIL
+)PNTS
+FIELD(ZPS01001) VAR(ZCMD) VAL(1)
+FIELD(ZPS01002) VAR(ZCMD) VAL(2)
+FIELD(ZPS01003) VAR(ZCMD) VAL(3)
+FIELD(ZPS01004) VAR(ZCMD) VAL(4)
+FIELD(ZPS01005) VAR(ZCMD) VAL(5)
+FIELD(ZPS01006) VAR(ZCMD) VAL(6)
+FIELD(ZPS01007) VAR(ZCMD) VAL(7)
+FIELD(ZPS01008) VAR(ZCMD) VAL(8)
+FIELD(ZPS01010) VAR(ZZCMD) VAL(nop)
+FIELD(ZPS01011) VAR(ZCMD) VAL(11)
+FIELD(ZPS01012) VAR(ZCMD) VAL(12)
+FIELD(ZPS01013) VAR(ZCMD) VAL(13)
+FIELD(ZPS01014) VAR(ZCMD) VAL(14)
+FIELD(ZPS01015) VAR(ZCMD) VAL(15)
+)END
