@@ -1,19 +1,21 @@
-)ATTR DEFAULT() FORMAT(MIX)
-  ! TYPE(output) INTENS(HIGH)
-  } TYPE(output) INTENS(LOW)
-  _ TYPE(INPUT) INTENS(HIGH) HILITE(USCORE) CAPS(OFF)
-  $ TYPE(INPUT) INTENS(LOW)
-)BODY WINDOW(65,11)
-%                       ZIGI v1.0 alpha
-+   Member or PDS to add  : !WHAT                              +
-+   Current git repo path : _repop                             +
-+   Short Commit mesage   : _commitm                           +
-%
-+   Autopush (yes/no)     : _ap
-%                   [ENTER] to continue...
-%                                               @wizardofzos 2018
-)INIT
-.CURSOR = repop
-)REINIT
-)PROC
-)END
+)ATTR DEFAULT() FORMAT(MIX)                                                  
+  ! TYPE(output) INTENS(HIGH)                                                   
+  } TYPE(output) INTENS(LOW)                                                    
+  _ TYPE(INPUT) INTENS(HIGH) HILITE(USCORE) CAPS(OFF)                           
+  $ TYPE(INPUT) INTENS(LOW)                                                     
+)BODY WINDOW(65,11)                                                             
+%                       ZIGI v1.0 alpha                                         
++   Member or PDS to add  : !WHAT                              +                
++   Current git repo path : _repop                             +                
++   Short Commit mesage   : _commitm                           +                
+%                                                                               
++   Library or member is added to repo and if it has a 'remote'                 
++   it will be pushed, make sure to set user.email and user.name                
++                                                                               
+%                   ENTER or PF3 to continue                                    
+%                                               @wizardofzos 2018               
+)INIT                                                                           
+.CURSOR = repop                                                                 
+)REINIT                                                                         
+)PROC                                                                           
+)END                                                                            
