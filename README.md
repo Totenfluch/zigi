@@ -3,7 +3,9 @@ zdevops ISPF git interface
 
 Interfacing with git on The Mainframe straight out of ISPF.
 Initial blogpost : http://zdevops.tumblr.com/post/171450515585/git-straight-outta-ispf 
+
 https://streamable.com/qa2th
+
 ## Installation Instructions
 * copy ZDO.PROD.ISPCLIB(ZGADD) to one of your "ISPCLIB"-datasets
 * copy ZDO.PROD.ISPPLIB(ZDOGIT00) to any library (it's dyn-alloced)
