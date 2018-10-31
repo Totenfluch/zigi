@@ -1,0 +1,99 @@
+#!/bin/bash
+
+display_usage() {
+        echo "zgr : Updating (refreshing) a git repository with z/OS PDS or Library content."
+        echo "\nUsage:\nzrg   [LIBRARY OR PDS] [/path/to/repo] [commit message]"
+        echo "This will store all members from <PDS> in /path/to/repo/<PDS> and push to the centralized repo."
+        echo
+}
+
+# We need two araguments......
+if [ $# -lt 2 ]
+then
+  display_usage
+  exit 1
+fi
+
+
+# Let's get some info
+system=`sysvar SMFID`
+meel=`whoami`
+meel=$meel@nowhere.com
+
+
+
+# If the second argument is not a git repo, create it
+if [ ! -d $2/.git ]
+then
+  mkdir -p $2
+  git init $2
+fi
+
+cd $2
+repodir=`pwd`
+
+echo "Working in $repodir"
+
+# Fetch remote changes and pull, or warn.....
+git fetch > /dev/null 2>/dev/null
+if [ $? -eq 0 ]
+then
+  git pull > /dev/null
+else
+  echo
+  echo "!!! WARNING !!!"
+  echo
+  echo "No remote repo defined (or not reachable)"
+  echo "If you're aware of the possible consequences press Enter to continue"
+  echo ""
+  echo "You could add the remote via the following commands: "
+  echo "  git remote add origin <uri>"
+  echo "  git push -u origin master"
+  read
+fi
+
+# Make sure we have a 'good-enough' .gitattributes
+cat > $repodir/.gitattributes <<EOL
+* git-encoding=iso8859-1 working-tree-encoding=ibm-1047
+.gitattributes git-encoding=iso8859-1 working-tree-encoding=iso8859-1
+.gitignore git-encoding=iso8859-1 working-tree-encoding=iso8859-1
+*.jpg git-encoding=BINARY working-tree-encoding=BINARY
+*.png git-encoding=BINARY working-tree-encoding=BINARY
+*.gif git-encoding=BINARY working-tree-encoding=BINARY
+*.zip git-encoding=BINARY working-tree-encoding=BINARY
+EOL
+
+# Make sure tag is correct
+chtag -tc iso8859-1 $repodir/.gitattributes
+
+# add .gitattributes
+cd $repodir
+git add .gitattributes > /dev/null
+
+# Now add all members from PDS/LIBRARY
+echo "Processing $1"
+mkdir -p $repodir/$1
+echo "Copy files"
+cp -U "//'$1'" $repodir/$1/
+echo "Git status"
+git status
+echo "Git add"
+git add $1/* > /dev/null 2>/dev/null
+echo "Git config"
+git config user.name `whoami`
+git config user.email "$meel"
+# We need the commit message, or prompt for it..
+echo "< 3 args??"
+if [ $# -lt 3 ]
+then
+  echo
+  echo "Please specify commit message"
+  read msg
+else
+  msg=$3
+fi
+
+git commit -m "$msg"  > /dev/null
+git push origin master
+
+echo
